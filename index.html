@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Maximally Even Chord Colorer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+:root{--panel-w:780px;}
+body{font-family:Inter,Arial,sans-serif;margin:18px;color:#222;min-height:100vh;}
+h1{margin:4px 0 12px;}
+.row{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap;}
+.panel{border:1px solid #e3e3e3;padding:12px;border-radius:8px;width:var(--panel-w);background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.03);}
+.small{width:360px;}
+label{font-weight:600;display:block;margin-bottom:6px;}
+select,button{padding:8px 10px;cursor:pointer;}
+.piano-container{position:relative;width:280px;height:160px;user-select:none;}
+.white-keys{display:flex;height:160px;}
+.white-key{width:40px;height:160px;border:1px solid #333;background:#fff;box-sizing:border-box;}
+.white-key.selected{background:#ccc;}
+.white-key.lightup{background:orange;}
+.black-keys{position:absolute;top:0;left:0;height:100px;width:100%;pointer-events:none;}
+.black-key{position:absolute;width:28px;height:100px;background:#000;z-index:10;pointer-events:auto;border-radius:3px;}
+.black-key.selected{background:#444;}
+.black-key.lightup{background:#f90;}
+#circleCanvas{border:1px solid #ddd;background:#fff;border-radius:6px;}
+pre{background:#fafafa;padding:8px;border-radius:6px;}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;}
+footer{margin-top:18px;font-size:13px;color:#666;}
+</style>
+</head>
+<body>
+<h1>Maximally Even Chord Colorer</h1>
+
+<div class="row">
+  <div class="panel small">
+    <label>1) Select Base Chord</label>
+    <div class="piano-container" id="basePiano">
+      <div class="white-keys" id="baseWhiteKeys"></div>
+      <div class="black-keys" id="baseBlackKeys"></div>
+    </div>
+  </div>
+
+  <div class="panel small">
+    <label>2) Select Mode</label>
+    <div class="piano-container" id="modePiano">
+      <div class="white-keys" id="modeWhiteKeys"></div>
+      <div class="black-keys" id="modeBlackKeys"></div>
+    </div>
+  </div>
+
+  <div class="panel small">
+    <label>3) Number of Color Notes</label>
+    <select id="colorCount"></select>
+
+    <div class="controls">
+      <button onclick="colorChord()">Color Chord</button>
+      <button onclick="playChord()">Play Chord</button>
+      <button onclick="demoExample()">Demo</button>
+      <label><input type="checkbox" id="arpeggioToggle" checked> Arpeggiate</label>
+    </div>
+
+    <label style="margin-top:10px;">Mode (readout)</label>
+    <pre id="modeOut">[]</pre>
+  </div>
+</div>
+
+<div class="row">
+  <canvas id="circleCanvas" width="520" height="520"></canvas>
+  <div style="max-width:220px;">
+    <h3>Results</h3>
+    <b>Final coloring (PCs)</b>
+    <pre id="finalPCs">—</pre>
+    <b>Readable</b>
+    <pre id="finalNames">—</pre>
+    <b>Evenness</b>
+    <div id="evennessOut">—</div>
+  </div>
+</div>
+
+<div class="blurb">
+  Musicians often refer to adding notes to a chord as coloring. The problem of coloring a chord as evenly as possible from a mode (set of notes) while using a base set of notes is solved using dynamic programming. We assign each vertex from the normal polygon to a note in the coloring, and try to minimize this distance.
+</div>
+
+<footer>
+Demo colors a C chord with base {C,G} with one color note {E} using Ionian mode to generate a major chord.
+</footer>
+
+<script>
+// ================= Utilities =================
+const noteNames=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+const pcToName=pc=>noteNames[(pc+12)%12];
+
+// ================= Piano =================
+const whitePCs=[0,2,4,5,7,9,11];
+const blackLayout=[{pc:1,left:30},{pc:3,left:70},{pc:6,left:150},{pc:8,left:190},{pc:10,left:230}];
+
+const baseSet=new Set(), modeSet=new Set();
+let lastFinalColoring=[], lastBaseChord=[], lastChordSize=0;
+
+// ================= Build Keyboard =================
+function buildKeyboard(whiteEl,blackEl,set){
+  whitePCs.forEach(pc=>{
+    const k=document.createElement("div"); k.className="white-key"; k.dataset.pc=pc; k.onclick=()=>toggle(k,pc,set); whiteEl.appendChild(k);
+  });
+  blackLayout.forEach(o=>{
+    const k=document.createElement("div"); k.className="black-key"; k.style.left=o.left+"px"; k.dataset.pc=o.pc;
+    k.onclick=e=>{e.stopPropagation(); toggle(k,o.pc,set);}; blackEl.appendChild(k);
+  });
+}
+buildKeyboard(baseWhiteKeys,baseBlackKeys,baseSet);
+buildKeyboard(modeWhiteKeys,modeBlackKeys,modeSet);
+
+// ================= Dynamic Color Count =================
+const colorSelect = document.getElementById("colorCount");
+function updateColorOptions(){
+  const maxColor = Math.max(1,7-baseSet.size);
+  colorSelect.innerHTML="";
+  for(let i=1;i<=maxColor;i++){
+    const opt=document.createElement("option");
+    opt.value=i;
+    opt.textContent=i;
+    colorSelect.appendChild(opt);
+  }
+  if(colorSelect.value>maxColor) colorSelect.value=maxColor;
+}
+
+// ================= Toggle Function =================
+function toggle(el,pc,set){
+  if(set.has(pc)){
+    set.delete(pc);
+    el.classList.remove("selected");
+  } else {
+    set.add(pc);
+    el.classList.add("selected");
+  }
+  updateColorOptions(); // update color dropdown whenever base chord changes
+}
+
+// ================= Canvas =================
+const canvas=circleCanvas, ctx=canvas.getContext("2d");
+const cx=260,cy=260,R=170;
+function ang(pc){return pc/12*2*Math.PI-Math.PI/2;}
+function drawBaseCircle(){
+  ctx.beginPath(); ctx.arc(cx,cy,R,0,2*Math.PI); ctx.strokeStyle="#ddd"; ctx.lineWidth=1.5; ctx.stroke();
+  for(let pc=0; pc<12; pc++){
+    const a=ang(pc),x=cx+Math.cos(a)*(R+26),y=cy+Math.sin(a)*(R+26)+4;
+    ctx.fillStyle="#333"; ctx.font="12px Arial"; ctx.fillText(pcToName(pc),x-10,y);
+  }
+}
+function drawNormalPolygon(onsets){
+  const pts=[];
+  for(let k=0;k<onsets;k++){
+    const a=ang(k*12/onsets);
+    pts.push({x:cx+R*Math.cos(a),y:cy+R*Math.sin(a)});
+  }
+  ctx.beginPath(); ctx.moveTo(pts[0].x,pts[0].y);
+  for(let i=1;i<pts.length;i++) ctx.lineTo(pts[i].x,pts[i].y);
+  ctx.closePath();
+  ctx.fillStyle="rgba(180,180,180,0.06)";
+  ctx.strokeStyle="rgba(120,120,120,0.45)";
+  ctx.lineWidth=1.6; ctx.fill(); ctx.stroke();
+  pts.forEach(p=>{ ctx.beginPath(); ctx.fillStyle="rgba(120,120,120,0.6)"; ctx.arc(p.x,p.y,4,0,2*Math.PI); ctx.fill(); });
+}
+function drawChordPolygon(pcs,highlightPc=-1,highlightColor=null){
+  if(!pcs||!pcs.length)return;
+  const pts=pcs.map(p=>({pc:p,a:ang(p),x:cx+R*Math.cos(ang(p)),y:cy+R*Math.sin(ang(p))})).sort((A,B)=>A.a-B.a);
+  ctx.beginPath(); ctx.moveTo(pts[0].x,pts[0].y);
+  for(let i=1;i<pts.length;i++) ctx.lineTo(pts[i].x,pts[i].y);
+  ctx.closePath(); ctx.fillStyle="rgba(200,40,40,0.12)";
+  ctx.strokeStyle="rgba(200,40,40,0.95)"; ctx.lineWidth=3; ctx.fill(); ctx.stroke();
+  pts.forEach(p=>{
+    ctx.beginPath(); 
+    ctx.fillStyle=(highlightPc===p.pc)?highlightColor:"rgba(200,40,40,1)";
+    ctx.arc(p.x,p.y,7,0,2*Math.PI); ctx.fill();
+    ctx.fillStyle="#fff"; ctx.font="11px Arial"; ctx.fillText(p.pc,p.x-6,p.y+4);
+  });
+}
+function drawAll(pcs,onsets,highlightPc=-1,highlightColor=null){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  drawBaseCircle(); drawNormalPolygon(onsets); drawChordPolygon(pcs,highlightPc,highlightColor);
+}
+
+// ================= Server =================
+function chordSize(){
+  lastChordSize = (+colorCount.value) + lastBaseChord.length;
+  return lastChordSize;
+}
+
+function colorChord(){
+  const base=[...baseSet], mode=[...modeSet];
+  lastBaseChord=base.slice();
+  fetch("/compute_chord",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({baseChord:base,mode:mode,onsets:chordSize()})})
+  .then(r=>r.json()).then(d=>{
+    lastFinalColoring=d.bestColoring||[];
+    finalPCs.textContent="["+lastFinalColoring.join(",")+"]";
+    finalNames.textContent="["+lastFinalColoring.map(pcToName).join(",")+"]";
+    evennessOut.textContent=d.maxEvenness.toFixed(4);
+    drawAll(lastFinalColoring,chordSize());
+  });
+}
+
+// ================= Audio =================
+const AudioCtx=window.AudioContext||window.webkitAudioContext;
+const audioCtx=new AudioCtx();
+
+function playNote(pc,oct,delay=0){
+  const osc=audioCtx.createOscillator();
+  const g=audioCtx.createGain();
+  const midi=60+pc+12*(oct-4);
+  const freq=440*Math.pow(2,(midi-69)/12);
+  osc.frequency.value=freq;
+  g.gain.setValueAtTime(0.0001,audioCtx.currentTime+delay);
+  g.gain.exponentialRampToValueAtTime(0.2,audioCtx.currentTime+0.02+delay);
+  g.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+0.8+delay);
+  osc.connect(g).connect(audioCtx.destination);
+  osc.start(audioCtx.currentTime+delay); osc.stop(audioCtx.currentTime+0.9+delay);
+}
+
+function highlightKey(pc,isBase){
+  const container=isBase?"#basePiano":"#modePiano";
+  const color=isBase?"lightup":"lightup";
+  document.querySelectorAll(`${container} [data-pc='${pc}']`).forEach(k=>{
+    k.classList.add(color);
+    setTimeout(()=>k.classList.remove(color),200);
+  });
+}
+
+// ================= Play Chord =================
+function playChord(){
+  if(!lastFinalColoring.length) return;
+
+  const base = new Set(lastBaseChord);
+  const arpeggio = arpeggioToggle.checked;
+
+  const baseNotes = lastFinalColoring.filter(pc=>base.has(pc)).sort((a,b)=>a-b);
+  const colorNotes = lastFinalColoring.filter(pc=>!base.has(pc)).sort((a,b)=>a-b);
+
+  if(arpeggio){
+    const ordered = [...baseNotes,...colorNotes];
+    ordered.forEach((pc,i)=>{
+      const isBase = base.has(pc);
+      playNote(pc,isBase?4:5,i*0.25);
+      setTimeout(()=>highlightKey(pc,isBase),i*250);
+    });
+  } else {
+    lastFinalColoring.forEach(pc=>{
+      const isBase = base.has(pc);
+      playNote(pc,isBase?4:5);
+      highlightKey(pc,isBase);
+    });
+  }
+}
+
+// ================= Demo =================
+function demoExample(){
+  baseSet.clear(); modeSet.clear();
+  [0,7].forEach(p=>baseSet.add(p));
+  [0,2,4,5,7,9,11].forEach(p=>modeSet.add(p));
+  document.querySelectorAll(".white-key,.black-key").forEach(k=>k.classList.remove("selected"));
+  document.querySelectorAll("#basePiano [data-pc]").forEach(k=>baseSet.has(+k.dataset.pc)&&k.classList.add("selected"));
+  document.querySelectorAll("#modePiano [data-pc]").forEach(k=>modeSet.has(+k.dataset.pc)&&k.classList.add("selected"));
+  modeOut.textContent="[0,2,4,5,7,9,11]";
+  updateColorOptions();
+  colorChord();
+}
+
+// ================= Init =================
+updateColorOptions();
+</script>
+</body>
+</html>
