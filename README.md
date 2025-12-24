@@ -46,8 +46,6 @@ As a simplified example, straight quarter notes in 4/4, or simply tapping your f
 
 [x...x...x...x...]
 
-markdown
-Copy code
 
 Note the evenness of this rhythm—we'll revisit this shortly.
 
@@ -82,8 +80,6 @@ A maximally even rhythm spaces all onsets as equally as possible. For example:
 
 [x...x...x...x...]
 
-perl
-Copy code
 
 To make maximal even rhythms less predictable, we consider rhythm classes `R[X,Y]` where `X` and `Y` are coprime. Distinct structures arise while maximizing evenness.
 
@@ -99,8 +95,6 @@ Example geodesic sums:
 
 2 + 3 + 3 + 4 + 4 + 6 + 6 + 6 + 7 + 7 = 48
 
-yaml
-Copy code
 
 However, this metric sometimes fails to distinguish rhythms that intuitively feel more even:
 
@@ -112,7 +106,7 @@ However, this metric sometimes fails to distinguish rhythms that intuitively fee
 
 This metric uses Euclidean distance between onsets in geometric form:
 
-![Distance Evenness](imgs/IMG_7389.jpg)
+![Distance Evenness](imgs/IMG_7389.JPG)
 
 Scores:
 
