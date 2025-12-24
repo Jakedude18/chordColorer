@@ -1,0 +1,129 @@
+/*! tailwindcss v4.1.18 | MIT License | https://tailwindcss.com */
+@layer properties;
+.absolute {
+  position: absolute;
+}
+.relative {
+  position: relative;
+}
+.container {
+  width: 100%;
+}
+.block {
+  display: block;
+}
+.flex {
+  display: flex;
+}
+.min-h-screen {
+  min-height: 100vh;
+}
+.w-full {
+  width: 100%;
+}
+.max-w-\[220px\] {
+  max-width: 220px;
+}
+.min-w-\[280px\] {
+  min-width: 280px;
+}
+.flex-1 {
+  flex: 1;
+}
+.flex-col {
+  flex-direction: column;
+}
+.flex-wrap {
+  flex-wrap: wrap;
+}
+.items-center {
+  align-items: center;
+}
+.items-start {
+  align-items: flex-start;
+}
+.justify-center {
+  justify-content: center;
+}
+.border {
+  border-style: var(--tw-border-style);
+  border-width: 1px;
+}
+.text-center {
+  text-align: center;
+}
+.transition-colors {
+  transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to;
+  transition-timing-function: var(--tw-ease, ease);
+  transition-duration: var(--tw-duration, 0s);
+}
+.select-none {
+  -webkit-user-select: none;
+  user-select: none;
+}
+.piano-container {
+  position: relative;
+  user-select: none;
+}
+.white-keys {
+  display: flex;
+  height: 160px;
+}
+.white-key {
+  width: 40px;
+  height: 160px;
+  border: 1px solid #333;
+  background: #fff;
+  box-sizing: border-box;
+}
+.white-key.selected {
+  background: #ccc;
+}
+.white-key.lightup {
+  background: orange;
+}
+.black-keys {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100px;
+  width: 100%;
+  pointer-events: none;
+}
+.black-key {
+  position: absolute;
+  width: 28px;
+  height: 100px;
+  background: #000;
+  z-index: 10;
+  pointer-events: auto;
+  border-radius: 3px;
+}
+.black-key.selected {
+  background: #444;
+}
+.black-key.lightup {
+  background: #f90;
+}
+#circleCanvas {
+  border: 1px solid #ddd;
+  background: #fff;
+  border-radius: 6px;
+}
+pre {
+  background: #fafafa;
+  padding: 8px;
+  border-radius: 6px;
+}
+@property --tw-border-style {
+  syntax: "*";
+  inherits: false;
+  initial-value: solid;
+}
+@layer properties {
+  @supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))) {
+    *, ::before, ::after, ::backdrop {
+      --tw-border-style: solid;
+    }
+  }
+}
