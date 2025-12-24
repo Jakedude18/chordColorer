@@ -6,6 +6,32 @@
 
 ---
 
+
+### [Maximally Even Chord Colorer](https://jakedude18.pythonanywhere.com/)
+
+For my project, I built a program to find maximally even chords using [Linear Regression Evenness](Linear-Regression-Evenness). The user defines the base chord notes and a mode to "color" the chord with additional notes, then the implementation adds a specified amount of colored notes. The user can see their colored chord overlaid on the normal polygon used to calculate its evenness. Try it out using the link above!
+
+### Functionality
+
+Dynamic programming is used to assign each vertex of a normal polygon to a note in the chord, minimizing the distance from each vertex to its assigned note. The recursive subproblem is defined as follows (v = vertices of normal polygon, b = base notes, c = current coloring).  
+
+```python
+color(v, b, c) = 
+    if v = 0: c
+    elif v[0] < b: c + b[0]
+    else: min(c + b[0], c + v[0], b[len(b) - 1] + c)
+  
+ ```
+
+The last branch tries three diferent colorings by adding:
+     1. the first base note
+     2. the last base note
+     3. the closest note in the mode (notated v[0]) 
+It takes the one that leads to the smallest deviation from normal polygon
+See chordColorer.py if interested in the heart of the coloring algorithm.
+
+# All the methods below explore how to measure the evenness of rhythms and isomorphically chords. 
+
 ## Introduction
 
 This paper is a structured report on Godfried Toussaint's work *"Computational Geometric Aspects of Rhythm, Melody, and Voice-Leading."* The goal is to summarize the core geometric models used to measure rhythmic (and chordal) evenness and interpret their mathematical and musical meaning.
@@ -113,19 +139,3 @@ Evenness scores (smaller = more even):
 - Shiko: `[x...x.x...x.x...] = 2.4`  
 - Gahu: `[x..x..x...x...x.] = 2.2`  
 - Soukous: `[x..x..x...xx....] = 2.8`  
-
----
-
-## Maximally Even Chord Coloring Implementation
-
-All the above methods can apply to melodies or chords. For my project, I built a program to find maximally even chords using Linear Regression Evenness. Users can define base chord notes and a mode to "color" the chord with additional notes while keeping maximal evenness.
-
-### Functionality
-
-Dynamic programming is used to assign each vertex of a normal polygon to a note in the chord, minimizing the distance:
-
-```python
-color(v, b, c) = 
-    if v = 0: c
-    elif v[0] < b: c + b[0]
-    else: min(c + b[0], c + v[0])
