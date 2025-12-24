@@ -11,9 +11,13 @@ def test_cMajor():
 
 
 #C augmented over altered mode
-#base = g, b [7,11]
-#mode = [0,1,3,4,6,8,10]
-#coloring = [3,7,11]
+
+def test_cAugmented():
+    base = [7, 11] #g ,b
+    mode = [0,1,3,4,6,8,10]
+    expectedColoring = [3,7,11]
+    coloring, _ = chordColorer.chordColorerHelper(base, mode, 3)
+    assert(set(coloring) != set(expectedColoring))
 
 
 

@@ -95,6 +95,8 @@ const whitePCs=[0,2,4,5,7,9,11];
 const blackLayout=[{pc:1,left:30},{pc:3,left:70},{pc:6,left:150},{pc:8,left:190},{pc:10,left:230}];
 
 const baseSet=new Set(), modeSet=new Set();
+const modeOut = document.getElementById("modeOut");
+
 let lastFinalColoring=[], lastBaseChord=[], lastChordSize=0;
 
 // ================= Build Keyboard =================
@@ -133,7 +135,18 @@ function toggle(el,pc,set){
     set.add(pc);
     el.classList.add("selected");
   }
-  updateColorOptions(); // update color dropdown whenever base chord changes
+  if(set === modeSet){
+    updateModeOut();
+  }
+  else {
+    updateColorOptions(); // update color dropdown whenever base chord changes
+  }
+}
+
+
+function updateModeOut(){
+  const arr = [...modeSet].sort((a,b)=>a-b);
+  modeOut.textContent = "[" + arr.join(",") + "]";
 }
 
 // ================= Canvas =================
@@ -147,20 +160,43 @@ function drawBaseCircle(){
     ctx.fillStyle="#333"; ctx.font="12px Arial"; ctx.fillText(pcToName(pc),x-10,y);
   }
 }
-function drawNormalPolygon(onsets){
-  const pts=[];
-  for(let k=0;k<onsets;k++){
-    const a=ang(k*12/onsets);
-    pts.push({x:cx+R*Math.cos(a),y:cy+R*Math.sin(a)});
+
+function drawNormalPolygon(onsets, offset = 0) {
+  const pts = [];
+
+  for (let k = 0; k < onsets; k++) {
+    // shift by `offset` semitone ticks
+    const tick = (k * 12 / onsets) + offset;
+    const a = ang(tick);
+
+    pts.push({
+      x: cx + R * Math.cos(a),
+      y: cy + R * Math.sin(a)
+    });
   }
-  ctx.beginPath(); ctx.moveTo(pts[0].x,pts[0].y);
-  for(let i=1;i<pts.length;i++) ctx.lineTo(pts[i].x,pts[i].y);
+
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
   ctx.closePath();
-  ctx.fillStyle="rgba(180,180,180,0.06)";
-  ctx.strokeStyle="rgba(120,120,120,0.45)";
-  ctx.lineWidth=1.6; ctx.fill(); ctx.stroke();
-  pts.forEach(p=>{ ctx.beginPath(); ctx.fillStyle="rgba(120,120,120,0.6)"; ctx.arc(p.x,p.y,4,0,2*Math.PI); ctx.fill(); });
+
+  ctx.fillStyle = "rgba(180,180,180,0.06)";
+  ctx.strokeStyle = "rgba(120,120,120,0.45)";
+  ctx.lineWidth = 1.6;
+  ctx.fill();
+  ctx.stroke();
+
+  pts.forEach(p => {
+    ctx.beginPath();
+    ctx.fillStyle = "rgba(120,120,120,0.6)";
+    ctx.arc(p.x, p.y, 4, 0, 2 * Math.PI);
+    ctx.fill();
+  });
 }
+
+
+
+
 function drawChordPolygon(pcs,highlightPc=-1,highlightColor=null){
   if(!pcs||!pcs.length)return;
   const pts=pcs.map(p=>({pc:p,a:ang(p),x:cx+R*Math.cos(ang(p)),y:cy+R*Math.sin(ang(p))})).sort((A,B)=>A.a-B.a);
@@ -169,15 +205,15 @@ function drawChordPolygon(pcs,highlightPc=-1,highlightColor=null){
   ctx.closePath(); ctx.fillStyle="rgba(200,40,40,0.12)";
   ctx.strokeStyle="rgba(200,40,40,0.95)"; ctx.lineWidth=3; ctx.fill(); ctx.stroke();
   pts.forEach(p=>{
-    ctx.beginPath(); 
+    ctx.beginPath();
     ctx.fillStyle=(highlightPc===p.pc)?highlightColor:"rgba(200,40,40,1)";
     ctx.arc(p.x,p.y,7,0,2*Math.PI); ctx.fill();
     ctx.fillStyle="#fff"; ctx.font="11px Arial"; ctx.fillText(p.pc,p.x-6,p.y+4);
   });
 }
-function drawAll(pcs,onsets,highlightPc=-1,highlightColor=null){
+function drawAll(pcs,onsets,highlightPc=-1,highlightColor=null, offset){
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  drawBaseCircle(); drawNormalPolygon(onsets); drawChordPolygon(pcs,highlightPc,highlightColor);
+  drawBaseCircle(); drawNormalPolygon(onsets, offset); drawChordPolygon(pcs,highlightPc,highlightColor);
 }
 
 // ================= Server =================
@@ -195,7 +231,7 @@ function colorChord(){
     finalPCs.textContent="["+lastFinalColoring.join(",")+"]";
     finalNames.textContent="["+lastFinalColoring.map(pcToName).join(",")+"]";
     evennessOut.textContent=d.maxEvenness.toFixed(4);
-    drawAll(lastFinalColoring,chordSize());
+    drawAll(lastFinalColoring, chordSize(), -1, null, d.offset);
   });
 }
 
