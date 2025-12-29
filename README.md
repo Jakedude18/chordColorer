@@ -11,6 +11,11 @@
 
 For my project (hosted on the website above), I built a program to find maximally even chords using [Linear Regression Evenness](#Linear-Regression-Evenness). The user defines the base chord notes and a mode to "color" the chord with additional notes, then the implementation adds a specified amount of colored notes. The user can see their colored chord overlaid on the normal polygon used to calculate its evenness. Try it out using the link above!
 
+### User Guide
+
+The user sets their desired base notes, mode, and the number of color tones (n). The implementation then selects n color tones from the mode that form the maximally even chord. If you click on the demo button, the set sets the base notes as {C, G}, the C-Ionian mode (c major scale), and 1 color tone. The resulting colored chord is a C major chord. {C, E, G}. If you increase the number of color tones 2, the app generates a $C^6_9$ {C, D, G, A}; 3 color tones, and the app generates a Csus chord! {C, D, F, G, A}
+
+
 ### Functionality
 
 Dynamic programming is used to assign each vertex of a normal polygon to a note in the chord, minimizing the distance from each vertex to its assigned note. The recursive subproblem is defined as follows (v = vertices of normal polygon, b = base notes, c = current coloring).  
@@ -23,7 +28,7 @@ color(v, b, c) =
   
  ```
 
-The last branch tries three diferent colorings by adding:
+The last branch tries three different colorings by adding:
      1. the first base note
      2. the last base note
      3. the closest note in the mode (notated v[0]) 
