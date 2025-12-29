@@ -35,11 +35,11 @@ The last branch tries three different colorings by adding:
 It takes the one that leads to the smallest deviation from normal polygon
 See chordColorer.py if interested in the heart of the coloring algorithm.
 
-# All the methods below explore how to measure the evenness of rhythms and isomorphically chords. 
-
+#### All the methods below explore how to measure the evenness of rhythms and isomorphically chords. 
 ## Introduction
 
-This paper is a structured report on Godfried Toussaint's work *"Computational Geometric Aspects of Rhythm, Melody, and Voice-Leading."* The goal is to summarize the core geometric models used to measure rhythmic (and chordal) evenness and interpret their mathematical and musical meaning.
+
+This paper is a structured report on Godfried Toussaint's work [*"Computational Geometric Aspects of Rhythm, Melody, and Voice-Leading."*](https://cgm.cs.mcgill.ca/~godfried/publications/rhythm-melody-voice-leading.pdf). The goal is to summarize the core geometric models used to measure rhythmic (and chordal) evenness and interpret their mathematical and musical meaning.
 
 More broadly, this paper explores how rhythms can be modeled using geometric and computational methods. A central idea is that rhythmic patterns can be represented as points arranged on a circle, allowing for the mathematical study of distance, symmetry, and evenness.
 
