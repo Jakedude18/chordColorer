@@ -9,7 +9,7 @@
 
 ### [Maximally Even Chord Colorer](https://jakedude18.pythonanywhere.com/)
 
-For my project (hosted on the website above), I built a program to find maximally even chords using [Linear Regression Evenness](#Linear-Regression-Evenness). The user defines the base chord notes and a mode to "color" the chord with additional notes, then the implementation adds a specified amount of colored notes. The user can see their colored chord overlaid on the normal polygon used to calculate its evenness. Try it out using the link above!
+A compositional chord-coloring tool that adds notes to user-defined musical chords as evenly as possible. (hosted on the website above). The user defines the base chord notes and a mode to "color" the chord with additional notes, then the app adds a specified amount of colored notes. The user can see their colored chord overlaid on the normal polygon used to calculate its evenness. To measure evenss, the app uses the [Linear Regression Evenness](#Linear-Regression-Evenness) metric. Try it out using the link above!
 
 ### User Guide
 
