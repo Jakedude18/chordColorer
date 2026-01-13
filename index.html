@@ -220,18 +220,30 @@ function chordSize(){
   return lastChordSize;
 }
 
-function colorChord(){
+async function colorChord(){
   const base=[...baseSet], mode=[...modeSet];
   lastBaseChord=base.slice();
-  fetch("/compute_chord",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({baseChord:base,mode:mode,onsets:chordSize()})})
-  .then(r=>r.json()).then(d=>{
-    lastFinalColoring=d.bestColoring||[];
-    finalPCs.textContent="["+lastFinalColoring.join(",")+"]";
-    finalNames.textContent="["+lastFinalColoring.map(pcToName).join(",")+"]";
-    evennessOut.textContent=d.maxEvenness.toFixed(4);
-    drawAll(lastFinalColoring, chordSize(), -1, null, d.offset);
+
+  const r = await fetch("/compute_chord",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      baseChord: base,
+      mode: mode,
+      onsets: chordSize()
+    })
   });
+
+  const d = await r.json();
+
+  lastFinalColoring = d.bestColoring || [];
+  finalPCs.textContent = "["+lastFinalColoring.join(",")+"]";
+  finalNames.textContent = "["+lastFinalColoring.map(pcToName).join(",")+"]";
+  evennessOut.textContent = d.maxEvenness.toFixed(4);
+
+  drawAll(lastFinalColoring, chordSize(), -1, null, d.offset);
 }
+
 
 // ================= Audio =================
 const AudioCtx=window.AudioContext||window.webkitAudioContext;
@@ -298,7 +310,7 @@ function demoExample(){
   colorChord();
 }
 
-function random() {
+async function random() {
   baseSet.clear();
   modeSet.clear();
 
@@ -340,7 +352,7 @@ function random() {
   }
   updateColorOptions();
   colorSelect.value = randInt(min, 7 - baseSize)
-  colorChord();
+  await colorChord();
   playChord();
 }
 
