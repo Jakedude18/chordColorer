@@ -29,10 +29,17 @@ def test_rootlessCMajor7():
     coloring, _, _ = maximallyEvenColorer.color(base, mode, 3)
     assert(coloring == expectedColoring)
 
-def test_random_fail():
+def test_base_6():
     base = [2,4,6,9,11]
     mode = [2,4,6,7,9,10,11]
     expectedColoring = [2,4,6,7,9,10,11]
     coloring, _, _ = maximallyEvenColorer.color(base, mode, 7)
     assert(coloring == expectedColoring)
 
+
+def test_base_7():
+    mode = [1,2,3,5,8,9,10]
+    base = [2,3,5,8,9,10]
+    expectedColoring = [1,2,3,5,8,9,10]
+    coloring, _, _ = maximallyEvenColorer.color(base, mode, 7)
+    assert(coloring == expectedColoring)
