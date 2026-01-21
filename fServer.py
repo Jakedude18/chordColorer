@@ -19,9 +19,6 @@ def compute_chord():
     # Call chordColorers.py with proper parameters
     try:
         coloring, evennessScore, offset = maximallyEvenColorer.color(baseChord, mode, notes)
-        print("test")
-        print(coloring)
-        print("out")
         if coloring is None:
             coloring = []
     except Exception as e:

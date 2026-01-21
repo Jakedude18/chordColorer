@@ -43,3 +43,20 @@ def test_base_7():
     expectedColoring = [1,2,3,5,8,9,10]
     coloring, _, _ = maximallyEvenColorer.color(base, mode, 7)
     assert(coloring == expectedColoring)
+
+def test_error():
+    mode = [0,3,6,9,11]
+    base = [0,7]
+    expectedColoring = [0,3,7,9]
+    coloring, _, _ = maximallyEvenColorer.color(base, mode, 4)
+    assert(coloring == expectedColoring)
+
+
+def test_c_minor():
+    mode = [0,2,3,5,7,9,11]
+    base = [0,7]
+    expectedColoring = [0,3,7]
+    coloring, _, _ = maximallyEvenColorer.color(base, mode, 3)
+    assert(coloring == expectedColoring)
+
+

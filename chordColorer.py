@@ -24,7 +24,6 @@ Returns - Final coloring of n notes using the base coloring
 Description: Helper for chordColorer 
 """
 def chordColorerHelper(baseChord, m, n):
-
     if (len(baseChord) > n): raise ValueError("n must be larger than len(baseChord)")
 
     #queue to support fifo; useful in recursion
@@ -32,6 +31,8 @@ def chordColorerHelper(baseChord, m, n):
     global normalInterval
     global mode
     global noteCount
+    global memo
+    memo = {}
     noteCount = n
     mode = m
     normalInterval = pulses / noteCount
@@ -66,7 +67,7 @@ def colorChord(vertices: deque, base: deque, coloring=[]):
     
 
     #Check Memorization Table to avoid duplicate computation
-    key = tuple([tuple(vertices), tuple(base), tuple(coloring)])
+    key = tuple([tuple(vertices), tuple(base), tuple(coloring), tuple(mode), noteCount])
     if key in memo:
         return memo[key]
     # Make copies for recursion
@@ -88,6 +89,9 @@ def colorChord(vertices: deque, base: deque, coloring=[]):
     baseColoring = colorChord(vertices_copy, base_copy, baseColoring)
     base_copy = base.copy()
 
+    # If more base notes than total notes we must chose the base notes
+    if len(base) >= len(vertices):
+        return baseColoring
 
     cases = [c for c in [baseColoring, closestColoring] if c is not None]
 

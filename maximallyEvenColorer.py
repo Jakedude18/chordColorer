@@ -21,19 +21,15 @@ def color(baseChord, m, n):
         coloring, score = chordColorer.chordColorerHelper(offsetBaseChord, offsetMode, n)
         coloring = [reset(b, note) for note in coloring]
         if score < minScore:
-            minColoring=coloring
+            minColoring = coloring[:]
             minScore = score
             minoffSet = b
     minColoring.sort()
     return minColoring, minScore, minoffSet
 
 
-#offset the pitch class (pc) by the new origin (b)
 def offset(b, pc):
-    pc -= b
-    if pc < 0:
-        pc = 12 - abs(pc)
-    return pc
+    return (pc - b) % 12
 
 
 #reset the pitch class (pc) to origin 0 - inverse of offset
@@ -44,9 +40,8 @@ def reset(b, pc):
 
 
 if __name__ == "__main__":
-    o = 6
-    baseChord = [11]
-    m = [0,2,4,5,7,9,11]
-    color(baseChord, m, o)
-
-
+    mode = [0,2,3,5,7,9,11]
+    base = [0,7]
+    expectedColoring = [0,3,7]
+    coloring, _, _ = color(base, mode, 3)
+    print(coloring)
