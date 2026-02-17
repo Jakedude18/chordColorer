@@ -1,0 +1,22 @@
+/* ====== Custom piano key styles ====== */
+{
+    .white-key {
+      @apply h-40 w-10 rounded-sm border border-gray-400 bg-white;
+    }
+    .white-key.selected {
+      @apply bg-gray-500;
+    }
+    .white-key.lightup {
+      @apply bg-orange-500;
+    }
+  
+    .black-key {
+      @apply absolute z-10 h-24 w-7 rounded-sm bg-black;
+    }
+    .black-key.selected {
+      @apply bg-gray-700;
+    }
+    .black-key.lightup {
+      @apply bg-orange-400;
+    }
+}

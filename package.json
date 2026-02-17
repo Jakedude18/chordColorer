@@ -1,0 +1,12 @@
+{
+  "name": "chordcolorer",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "tailwindcss -c tailwindcss.config.js -i src/input.css -o src/static/output.css"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.24",
+    "postcss": "^8.4.32",
+    "tailwindcss": "^4.1.18"
+  }
+}
