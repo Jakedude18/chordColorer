@@ -303,4 +303,8 @@ function shuffle(arr) {
 
 
 // ================= Init =================
-updateColorOptions();
+window.onload = function () {
+    updateColorOptions();
+    demoExample();
+}
+
