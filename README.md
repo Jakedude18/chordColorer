@@ -13,7 +13,7 @@ A compositional chord-coloring tool that adds notes to user-defined musical chor
 
 ### User Guide
 
-The user sets their desired base notes, mode, and the number of color tones (n). The implementation then selects n color tones from the mode that form the maximally even chord. If you click on the demo button, the set sets the base notes as {C, G}, the C-Ionian mode (c major scale), and 1 color tone. The resulting colored chord is a C major chord. {C, E, G}. If you increase the number of color tones 2, the app generates a $C^6_9$ {C, D, G, A}; 3 color tones, and the app generates a Csus chord! {C, D, F, G, A}
+The user sets their desired base notes, mode, and the number of color tones (n). The implementation then selects n color tones from the mode that result in a maximally even chord when combined with the base notes. If you click on the demo button, the base notes are set as {C, G}, the C-Ionian mode (c major scale), and 1 color tone. The resulting colored chord is a C major chord. {C, E, G}. If you increase the number of color tones 2, the app generates a $C^6_9$ {C, D, G, A}; 3 color tones, and the app generates a Csus chord! {C, D, F, G, A}
 
 
 ### Functionality
@@ -21,19 +21,31 @@ The user sets their desired base notes, mode, and the number of color tones (n).
 Dynamic programming is used to assign each vertex of a normal polygon to a note in the chord, minimizing the distance from each vertex to its assigned note. The recursive subproblem is defined as follows (v = vertices of normal polygon, b = base notes, c = current coloring).  
 
 ```python
-color(v, b, c) = 
-    if v = 0: c
-    elif v[0] < b: c + b[0]
-    else: min(c + b[0], c + v[0], b[len(b) - 1] + c)
+color(v, b, c) =
+    #Base Case
+    if len(v) == 0: return c
+
+    #Case 1
+    closestColoring = color(v[:-1], b, coloring + closestModalTone)
+
+    #If no more base notes remain, we must choose case 1 - shortcut
+    if len(b) == 0: return closestColoring
+
+    #Case 2
+    baseColoring = color(v[:-1], b[:-1], coloring + b[0])
+
+    #If more base notes than total notes, we must choose the base note - shortcut
+    if len(b) >= len(v): return baseColoring
+
+    #Take the most even of the two coloring cases
+    return min(closestColoring, baseColoring) #Measures linear-regression-evenness
   
  ```
 
-The last branch tries three different colorings by adding:
-     1. the first base note
-     2. the last base note
-     3. the closest note in the mode (notated v[0]) 
-It takes the one that leads to the smallest deviation from normal polygon
-See chordColorer.py if interested in the heart of the coloring algorithm.
+Geometrically, this algorithm finds a valid set of vertices with the smallest deviation from the normal polygon.
+There is another layer of complexity where MaximaallyEvenChordColorer.py centers the normal polygon on each vertex
+from the base chord, so this algorithm will be run once for each base note.
+However, I'd recommend reading chordColorer.py if interested in the heart of the coloring algorithm.
 
 #### All the methods below explore how to measure the evenness of rhythms and isomorphically chords. 
 ## Introduction
